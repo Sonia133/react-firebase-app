@@ -12,7 +12,10 @@ exports.getAllScreams = (request, response) => {
                 screamId: document.id,
                 body: document.data().body,
                 userHandle: document.data().userHandle,
-                createdAt: document.data().createdAt
+                createdAt: document.data().createdAt,
+                commentCount: document.data().commentCount,
+                likeCount: document.data().likeCount,
+                userImage: document.data().userImage
             }); 
         });
         return response.json(screams);
@@ -33,7 +36,7 @@ exports.postOneScream = (request, response) => {
     db
     .collection('screams')
     .add(newScream)
-    .then(document => {
+    .then(doc => {
         const resScream = newScream;
         resScream.screamid = doc.id;
         response.json(resScream);
@@ -84,17 +87,34 @@ exports.commentOnScream = (req, res) => {
         userImage: req.user.imageUrl
     };
 
+    let screamData;
+
     db.doc(`/screams/${req.params.screamId}`)
     .get()
     .then(doc => {
         if (!doc.exists) {
-            return res.status(404).json({ error: 'Scream not found!'} );
+            return res.status(404).json({ comment: 'Scream not found!'} );
         }
 
+        screamData = doc.data();
+        screamData.screamId = doc.id;
+        
         return doc.ref.update({ commentCount: doc.data().commentCount + 1});
     })
     .then(() => {
         return db.collection('comments').add(newComment);
+    })
+    .then(doc => {
+        if(screamData.userHandle !== req.user.handle) {
+            return db.doc(`/notifications/${doc.id}`).set({
+                createdAt: new Date().toISOString(),
+                recipient: screamData.userHandle,
+                sender: req.user.handle,
+                type: 'comment',
+                read: false,
+                screamId: screamData.screamId
+            })
+        }
     })
     .then(() => {
         res.json(newComment);
@@ -130,6 +150,18 @@ exports.likeScream = (req, res) => {
                 db.collection('likes').add({
                     screamId: req.params.screamId,
                     userHandle: req.user.handle
+                })
+                .then(doc => {
+                    if(screamData.userHandle !== req.user.handle) {
+                        return db.doc(`/notifications/${doc.id}`).set({
+                            createdAt: new Date().toISOString(),
+                            recipient: screamData.userHandle,
+                            sender: req.user.handle,
+                            type: 'like',
+                            read: false,
+                            screamId: screamData.screamId
+                        })
+                    }
                 })
                 .then(() => {
                     screamData.likeCount ++;
@@ -178,6 +210,9 @@ exports.unlikeScream = (req, res) => {
                         return screamDocument.update({ likeCount: screamData.likeCount });
                     })
                     .then(() => {
+                       return db.doc(`/notifications/${data.docs[0].id}`).delete()
+                    })
+                    .then(() => {
                         res.json(screamData);
                     })
             }
@@ -202,6 +237,34 @@ exports.deleteScream = (req, res) => {
             } else {
                 return document.delete();
             }
+        })
+        .then(() => {
+            const screamId = req.params.screamId;
+            const batch = db.batch();
+    
+            return db.collection('comments').where('screamId', '==', screamId)
+                .get()
+                .then(data => {
+                    data.forEach(doc => {
+                        batch.delete(db.doc(`/comments/${doc.id}`));
+                    })
+    
+                    return db.collection('likes').where('screamId', '==', screamId).get();
+                })
+                .then(data => {
+                    data.forEach(doc => {
+                        batch.delete(db.doc(`/likes/${doc.id}`));
+                    })
+    
+                    return db.collection('notifications').where('screamId', '==', screamId).get();
+                })
+                .then(data => {
+                    data.forEach(doc => {
+                        batch.delete(db.doc(`/notifications/${doc.id}`));
+                    })
+    
+                    return batch.commit();
+                })
         })
         .then(() => {
             res.json({ message: 'Scream deleted successfully!' })

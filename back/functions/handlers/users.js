@@ -53,7 +53,7 @@ exports.signup = (request, response) => {
             if (err.code === "auth/email-already-in-use") {
                 return response.status(400).json({message: 'Email already is in use.'});
             } else {
-                return response.status(500).json({message: err.code});
+                return response.status(500).json({general: 'Something went wrong. Please try again! '});
             }
         });
 };
@@ -100,6 +100,42 @@ exports.addUserDetails = (req, res) => {
     })
 }
 
+exports.getUserDetails = (req, res) => {
+    let userData = {};
+    db.doc(`/users/${req.params.handle}`)
+    .get()
+    .then(doc => {
+        if(doc.exists) {
+            userData.user = doc.data();
+            return db.collection('screams').where('userHandle', '==', req.params.handle)
+                .orderBy('createdAt', 'desc')
+                .get();
+        } else {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+    })
+    .then(data => {
+        userData.screams = [];
+        data.forEach(scream => {
+            userData.screams.push({
+                body: scream.data().body,
+                createdAt: scream.data().createdAt,
+                userHandle: scream.data().body,
+                userImage: scream.data().userImage,
+                likeCount: scream.data().likeCount,
+                commentCount: scream.data().commentCount,
+                screamId: data.id
+            })
+        })
+
+        return res.json(userData);
+    })
+    .catch(err => {
+        console.error(err);
+        return res.status(500).json({ error: err.code });
+    })
+}
+
 exports.getAuthenticatedUser = (req, res) => {
     let userData = {};
     db.doc(`users/${req.user.handle}`)
@@ -115,7 +151,25 @@ exports.getAuthenticatedUser = (req, res) => {
                     userData.likes.push(doc.data());
                 })
 
-                return res.json(userData);
+                return db.collection('notifications').where('recipient', '==', req.user.handle)
+                    .orderBy('createdAt', 'desc').limit(10)
+                    .get()
+                    .then(data => {
+                        userData.notifications = [];
+                        data.forEach(doc => {
+                            userData.notifications.push({
+                                recipient: doc.data().recipient,
+                                sender: doc.data().sender,
+                                createdAt: doc.data().createdAt,
+                                screamId: doc.data().screamId,
+                                type: doc.data().type,
+                                read: doc.data().read,
+                                notificationId: doc.id
+                            })
+                        })
+
+                        return res.json(userData);
+                    })
             })
             .catch(err => {
                 console.error(err);
@@ -154,6 +208,8 @@ exports.uploadImage = (req, res) => {
         file.pipe(fs.createWriteStream(filepath));
     })
 
+    let imageUrl;
+
     busboy.on('finish', () => {
         admin.storage().bucket().upload(imageTeBeUploaded.filepath, {
             resumable: false,
@@ -164,8 +220,22 @@ exports.uploadImage = (req, res) => {
             }
         })
         .then(() => {
-            const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
+            imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
             return db.doc(`/users/${req.user.handle}`).update({ imageUrl });
+        })
+        .then(() => {
+            const batch = db.batch();
+            return db.collection('screams').where('userHandle', '==', req.user.handle)
+                .get()
+                .then(data => {
+                    data.forEach(doc => {
+                        const scream = db.doc(`/screams/${doc.id}`);
+
+                        batch.update(scream, { userImage: imageUrl });
+                    })
+
+                    return batch.commit();
+                })
         })
         .then(() => {
             return res.json({ message: 'Image uploaded successfully!' });
@@ -177,3 +247,21 @@ exports.uploadImage = (req, res) => {
     });
     busboy.end(req.rawBody);
 }; 
+
+exports.markNotificationsRead = (req, res) => {
+    let batch = db.batch();
+
+    req.body.forEach(notificationId => {
+        const notification = db.doc(`/notifications/${notificationId}`);
+        batch.update(notification, { read: true });
+    });
+
+    batch.commit()
+        .then(() => {
+            return res.json({ message: 'Notifications marked read' });
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+        })
+}

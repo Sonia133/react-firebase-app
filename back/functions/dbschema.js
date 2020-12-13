@@ -27,6 +27,24 @@ let db = {
             body: 'nice',
             createdAt: '2020-12-12T14:35:19.504Z'
         }
+    ],
+    likes: [
+        {
+            userHandle: 'user',
+            screamId: 'dugih43467',
+            body: 'nice',
+            createdAt: '2020-12-12T14:35:19.504Z'
+        }
+    ],
+    notifications: [
+        {
+            recipient: 'user',
+            sender: 'john',
+            read: 'true | false',
+            screamId: 'eubgruf485u0gfh',
+            type: 'like | comment',
+            createdAt: '2020-12-12T14:35:19.504Z'
+        }
     ]
 };
 
