@@ -15,7 +15,7 @@ exports.signup = (request, response) => {
     };
 
     const { valid, errors } = validateSignupData(newUser);
-    if (!valid) return res.status(400).json(errors);
+    if (!valid) return response.status(400).json(errors);
 
     const noImg = 'no-img.png';
 
@@ -49,9 +49,8 @@ exports.signup = (request, response) => {
             return response.status(201).json({ token });
         })
         .catch((err) => {
-            console.error(err);
             if (err.code === "auth/email-already-in-use") {
-                return response.status(400).json({message: 'Email already is in use.'});
+                return response.status(400).json({email: 'Email already is in use.'});
             } else {
                 return response.status(500).json({general: 'Something went wrong. Please try again! '});
             }
