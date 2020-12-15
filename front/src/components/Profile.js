@@ -16,8 +16,12 @@ import LocationOn from '@material-ui/icons/LocationOn';
 import LinkIcon from '@material-ui/icons/Link';
 import CalendarToday from '@material-ui/icons/CalendarToday';
 import EditIcon from '@material-ui/icons/Edit';
+import KeyboardReturn from '@material-ui/icons/KeyboardReturn';
 
 import { logoutUser, uploadImage } from '../redux/actions/userActions';
+
+import EditDetails from './EditDetails';
+import EditButton from '../util/EditButton';
 
 const styles = (theme) => ({
     paper: {
@@ -80,6 +84,9 @@ class Profile extends Component {
         const fileInput = document.getElementById('imageInput');
         fileInput.click();
     }
+    handleLogout = () => {
+        this.props.logoutUser();
+    }
     render() {
         const { 
             classes, 
@@ -96,11 +103,14 @@ class Profile extends Component {
                     <div className="image-wrapper">
                         <img src={imageUrl} alt="profile" className="profile-image"/>
                         <input hidden="hidden" type="file" id="imageInput" onChange={this.handleImageChange}></input>
-                        <Tooltip title="Edit profile picture" placement="top">
-                            <IconButton onClick={this.handleEditPicture} className="button">
-                                <EditIcon color="primary"></EditIcon>
-                            </IconButton>
-                        </Tooltip>
+                        <EditButton 
+                            tip="Edit profile picture" 
+                            onClick={this.handleEditPicture}
+                            btnClassName="button"
+                        >
+                           <EditIcon color="primary"></EditIcon>
+                        </EditButton>
+
                     </div>
                     <hr/>
                     <div className="profile-details">
@@ -128,12 +138,18 @@ class Profile extends Component {
                         <CalendarToday color="primary"/> {' '}
                         <span>Joined {dayjs(createdAt).format('MMM YYYY')}</span>
                     </div>
+                    <Tooltip title="logout" placement="top">
+                        <IconButton onClick={this.handleLogout}>
+                            <KeyboardReturn color="primary"></KeyboardReturn>
+                        </IconButton>
+                    </Tooltip>
+                    <EditDetails />
                 </div>
             </Paper>
         ) : (
             <Paper className={classes.paper}>
                 <Typography variant="body2" align="center">
-                    No porfile found, please login again.
+                    No profile found, please login again.
                 </Typography>
                 <div className={classes.buttons}>
                     <Button variant="contained" color="primary" component={Link} to="/login">

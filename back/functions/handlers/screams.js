@@ -127,15 +127,15 @@ exports.commentOnScream = (req, res) => {
 
 exports.likeScream = (req, res) => {
     const likeDocument = db.collection('likes').where('userHandle', '==', req.user.handle)
-        .where('screamId', '==', req.params.screamId)
-        .limit(1);
+        .where('screamId', '==', req.params.screamId);
     
     const screamDocument = db.doc(`screams/${req.params.screamId}`);
 
     let screamData;
-
     screamDocument.get()
         .then(doc => {
+            console.log('here')
+            console.log(req.params)
             if(doc.exists) {
                 screamData = doc.data();
                 screamData.screamId = doc.id;
@@ -148,8 +148,8 @@ exports.likeScream = (req, res) => {
         .then(data => {
             if (data.empty) {
                 db.collection('likes').add({
-                    screamId: req.params.screamId,
-                    userHandle: req.user.handle
+                    userHandle: req.user.handle,
+                    screamId: screamData.screamId
                 })
                 .then(doc => {
                     if(screamData.userHandle !== req.user.handle) {
@@ -169,15 +169,15 @@ exports.likeScream = (req, res) => {
                 })
                 .then(() => {
                     return res.json(screamData);
-                })
+                });
             } else {
                 return res.status(400).json({ error: 'Scream already liked.'});
             }
         })
-        .catch(err => {
-            console.error(err);
-            res.status(500).json({ error: err.code })
-        });
+        .catch(error => {
+            console.log("error liking scream", error);
+            res.status(500).json({ error });
+        });     
 }
 
 exports.unlikeScream = (req, res) => {
