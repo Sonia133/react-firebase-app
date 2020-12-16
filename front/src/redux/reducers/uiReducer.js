@@ -1,12 +1,12 @@
-import { SET_ERRORS, CLEAR_ERRORS, LOADING_UI } from '../types';
+import { STOP_LOADING_UI, SET_ERRORS, CLEAR_ERRORS, LOADING_UI } from '../types';
 
 const initialState = {
     loading: false,
-    errors: {}
-};
+    errors: null
+};  
 
 export default function(state = initialState, action) {
-    switch(action.type) {
+    switch (action.type) {
         case SET_ERRORS:
             return {
                 ...state,
@@ -17,14 +17,19 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: false,
-                errors: {}
+                errors: null
             };
-        case LOADING_UI: 
+        case LOADING_UI:
             return {
                 ...state,
                 loading: true
             };
-        default: 
-        return state;
+        case STOP_LOADING_UI:
+            return {
+                ...state,
+                loading: false
+            };
+        default:
+            return state;
     }
 }

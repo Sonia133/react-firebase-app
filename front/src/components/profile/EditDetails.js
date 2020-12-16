@@ -12,8 +12,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import EditIcon from '@material-ui/icons/Edit';
 
-import { editUserDetails } from '../redux/actions/userActions';
-import EditButton from '../util/EditButton';
+import { editUserDetails } from '../../redux/actions/userActions';
+import EditButton from '../../util/EditButton';
 
 const styles = {
     button: {
@@ -25,15 +25,11 @@ const styles = {
 };
 
 class EditDetails extends Component {
-    constructor() {
-        super();
-
-        this.state = {
-            bio: '',
-            location: '',
-            website: '',
-            open: false
-        }
+    state = {
+        bio: '',
+        location: '',
+        website: '',
+        open: false
     }
     setUserDetailsToState = (credentials) => {
         this.setState({

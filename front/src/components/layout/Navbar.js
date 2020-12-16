@@ -8,8 +8,8 @@ import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import EditButton from '../util/EditButton';
-import PostScream from './PostScream';
+import EditButton from '../../util/EditButton';
+import PostScream from '../scream/PostScream';
 
 import HomeIcon from "@material-ui/icons/Home";
 import Notifications from "@material-ui/icons/Notifications";

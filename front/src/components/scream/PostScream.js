@@ -13,8 +13,8 @@ import TextField from '@material-ui/core/TextField';
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
 
-import EditButton from '../util/EditButton';
-import { postScream } from '../redux/actions/dataActions';
+import EditButton from '../../util/EditButton';
+import { postScream, clearErrors } from '../../redux/actions/dataActions';
 
 const styles = {
     textField: {
@@ -32,22 +32,19 @@ const styles = {
       left: "90%",
       top: "6%"
     }
-  };
+};
 
 class PostScream extends Component {
-    constructor() {
-        super();
-
-        this.state = {
-            open: false,
-            body: '',
-            errors: {}
-        };
-    }
+    state = {
+        open: false,
+        body: "",
+        errors: {}
+    };
     handleOpen = () => {
         this.setState({ open: true })
     }
     handleClose = () => {
+        this.props.clearErrors(); 
         this.setState({ open: false, errors: {} })
     }
     handleChange = event => {
@@ -59,11 +56,10 @@ class PostScream extends Component {
     };
     componentWillReceiveProps(nextProps) {
         if (nextProps.ui.errors) {
-          this.setState({ errors: nextProps.ui.errors });
+            this.setState({ errors: nextProps.ui.errors });
         }
         if (!nextProps.ui.errors && !nextProps.ui.loading) {
-          this.setState({ body: "" });
-          this.handleClose();
+            this.setState({ body: "", open: false, errors: {} });
         }
     }
     render() {
@@ -76,7 +72,7 @@ class PostScream extends Component {
                 </EditButton>
                 <Dialog 
                     open={this.state.open} 
-                    close={this.handleClose}
+                    onClose={this.handleClose}
                     fullWidth
                     maxWidth="sm"
                 >
@@ -106,7 +102,7 @@ class PostScream extends Component {
                                 className={classes.submitButton}
                                 disabled={loading}
                             >
-                                Submit
+                                Post
                                 {loading && (
                                     <CircularProgress size={30} className={classes.progressSpinner} />
                                 )}
@@ -121,6 +117,7 @@ class PostScream extends Component {
 
 PostScream.propTypes = {
     postScream: PropTypes.func.isRequired,
+    clearErrors: PropTypes.func.isRequired,
     ui: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired
 };
@@ -130,7 +127,8 @@ const mapStateToProps = state => ({
 });
 
 const mapActionToProps = {
-    postScream
+    postScream,
+    clearErrors
 }
 
 export default connect(mapStateToProps, mapActionToProps)(withStyles(styles)(PostScream));

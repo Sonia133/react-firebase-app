@@ -24,6 +24,9 @@ exports.getAllScreams = (request, response) => {
 };
 
 exports.postOneScream = (request, response) => {
+    if (request.body.body.trim() === '') {
+        return response.status(400).json({ body: 'Body must not be empty' });
+    }
     const newScream = {
         body: request.body.body,
         userHandle: request.user.handle,
@@ -37,12 +40,11 @@ exports.postOneScream = (request, response) => {
     .collection('screams')
     .add(newScream)
     .then(doc => {
-        const resScream = newScream;
-        resScream.screamid = doc.id;
-        response.json(resScream);
+        newScream.screamId = doc.id;
+        response.json(newScream);
     })
     .catch(err => {
-        response.status(500).json({error: 'Something went wrong.'});
+        res.status(500).json({ error: "Error adding new scream" });
         console.error(err);
     });
 };
@@ -77,7 +79,8 @@ exports.getScream = (req, res) => {
 };
 
 exports.commentOnScream = (req, res) => {
-    if (req.body.body.trim() === '') res.status(400).json({ error: 'Must not be empty.' });
+    if (req.body.body.trim() === '') 
+        return res.status(400).json({ comment: "must not be empty" });
 
     const newComment = {
         body: req.body.body,

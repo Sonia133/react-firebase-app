@@ -11,8 +11,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import DeleteOutline from '@material-ui/icons/DeleteOutline';
 
-import EditButton from '../util/EditButton';
-import { deleteScream } from '../redux/actions/dataActions';
+import EditButton from '../../util/EditButton';
+import { deleteScream } from '../../redux/actions/dataActions';
 
 const styles = {
     deleteButton: {
@@ -23,12 +23,8 @@ const styles = {
 }
 
 class DeleteScream extends Component {
-    constructor() {
-        super();
-
-        this.state = {
-            open: false
-        }
+    state = {
+        open: false
     }
     handleOpen = () => {
         this.setState({ open: true })

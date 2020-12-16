@@ -18,10 +18,10 @@ import CalendarToday from '@material-ui/icons/CalendarToday';
 import EditIcon from '@material-ui/icons/Edit';
 import KeyboardReturn from '@material-ui/icons/KeyboardReturn';
 
-import { logoutUser, uploadImage } from '../redux/actions/userActions';
+import { logoutUser, uploadImage } from '../../redux/actions/userActions';
 
 import EditDetails from './EditDetails';
-import EditButton from '../util/EditButton';
+import EditButton from '../../util/EditButton';
 
 const styles = (theme) => ({
     paper: {

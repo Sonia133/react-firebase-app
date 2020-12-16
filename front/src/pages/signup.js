@@ -52,7 +52,13 @@ class signup extends Component {
             email: '',
             password: '',
             confirmPassword: '',
-            handle: ''
+            handle: '',
+            errors: {}
+        }
+    }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.ui.errors) {
+          this.setState({ errors: nextProps.ui.errors });
         }
     }
     handleSubmit = (event) => {
@@ -71,7 +77,8 @@ class signup extends Component {
         })
     }
     render() {
-        const { classes, ui: { loading, errors } } = this.props;
+        const { classes, ui: { loading } } = this.props;
+        const { errors } = this.state;
 
         return (
             <Grid container className={classes.form}>
