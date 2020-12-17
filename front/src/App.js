@@ -13,6 +13,7 @@ import { SET_AUTHENTICATED } from './redux/types';
 import { logoutUser, getUserData } from './redux/actions/userActions';
 
 // pages
+import user from './pages/user';
 import home from './pages/home';
 import login from './pages/login';
 import signup from './pages/signup';
@@ -52,6 +53,8 @@ class App extends Component {
                 <Route exact path="/" component={home}/>
                 <AuthRoute exact path="/login" component={login} />
                 <AuthRoute exact path="/signup" component={signup} />
+                <Route exact path="/users/:handle" component={user}/>
+                <Route exact path="/users/:handle/scream/:screamId" component={user}/>
               </Switch>  
             </div> 
           </Router>

@@ -20,6 +20,7 @@ import KeyboardReturn from '@material-ui/icons/KeyboardReturn';
 
 import { logoutUser, uploadImage } from '../../redux/actions/userActions';
 
+import ProfileSkeleton from '../../util/ProfileSkeleton';
 import EditDetails from './EditDetails';
 import EditButton from '../../util/EditButton';
 
@@ -160,7 +161,9 @@ class Profile extends Component {
                     </Button>
                 </div>
             </Paper>
-        )) : (<p>loading..</p>)
+        )) : (
+            <ProfileSkeleton />
+        )
         return profileMarkup;
     }
 }

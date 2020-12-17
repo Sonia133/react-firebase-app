@@ -1,4 +1,4 @@
-import { SUBMIT_COMMENT, STOP_LOADING_UI, POST_SCREAM, DELETE_SCREAM, SET_SCREAMS, LOADING_DATA, LIKE_SCREAM, UNLIKE_SCREAM, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, SET_SCREAM } from '../types';
+import { SUBMIT_COMMENT, STOP_LOADING_UI, POST_SCREAM, DELETE_SCREAM, SET_SCREAMS, LOADING_DATA, LIKE_SCREAM, UNLIKE_SCREAM, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, SET_SCREAM, LOADING_USER, SET_USER } from '../types';
 import axios from 'axios';
 
 export const getScreams = () => (dispatch) => {
@@ -102,3 +102,17 @@ export const submitComment = (screamId, commentData) => dispatch =>{
             })
         })
 }
+
+export const getUserPage = (userHandle) => dispatch => {
+    dispatch({ type: LOADING_DATA });
+    axios.get(`/user/${userHandle}`)
+        .then(res => {
+            dispatch({
+                type: SET_SCREAMS,
+                payload: res.data.screams
+            });
+        })
+        .catch(() => {
+            dispatch({ type: SET_SCREAMS, payload: null})
+        });
+};

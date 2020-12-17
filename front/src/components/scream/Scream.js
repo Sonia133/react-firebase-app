@@ -76,7 +76,7 @@ class Scream extends Component {
                         <ChatIcon color="primary"></ChatIcon>    
                     </EditButton> 
                     <span>{commentCount} Comments </span>
-                    <ScreamDialog screamId={screamId} userHandle={userHandle} />
+                    <ScreamDialog screamId={screamId} userHandle={userHandle} openDialog={this.props.openDialog}/>
                 </CardContent>
            </Card>
         )
@@ -88,6 +88,7 @@ Scream.propTypes = {
     unlikeScream: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired,
     scream: PropTypes.object.isRequired,
+    openDialog: PropTypes.bool,
     classes: PropTypes.object.isRequired
 };
 
